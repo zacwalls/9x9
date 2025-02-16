@@ -1,60 +1,95 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { useState } from 'react'
+import { Image, StyleSheet, Platform, Button } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
+function PlayBoard() {
+  const [activeCell, setActiveCell] = useState([-1, -1])
+  const [gameBoard, setGameBoard] = useState([
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  ])
+
+  function updateCell(newNumber: number, cellCoordinates: number[]) {
+    if (
+      (cellCoordinates[0] < 0 || cellCoordinates[0] > 9) ||
+      (cellCoordinates[1] < 0 || cellCoordinates[1] > 9)
+    ) {
+      // Invalid coordinates
+      return
+    }
+
+    if (newNumber < 0 || newNumber > 9) {
+      // Invalid input
+      return
+    }
+
+    const newGameBoard = [...gameBoard]
+    const [targetRow, targetValue] = cellCoordinates
+
+    newGameBoard[targetRow][targetValue] = newNumber
+    setGameBoard(newGameBoard)
+  }
+
+  return (
+    <>
+      <div style={styles.board}>
+        {gameBoard.map((row, rowNumber) => (
+          <div style={styles.boardRow}>
+            {row.map((cellValue, columnNumber) => (
+              <div style={styles.boardCell} onClick={() => setActiveCell([rowNumber, columnNumber])}>
+                <ThemedText>{cellValue === 0 ? ' ' : cellValue}</ThemedText>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+      <div>
+        {Array.from({length: 9}, (_, i) => i + 1).map(number => (
+          <Button
+            title={number.toString()}
+            onPress={() => updateCell(number, activeCell)}
+          />
+        ))}
+      </div>
+    </>
+  )
+}
+
 export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
+        <PlayBoard />
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  board: {
+    display: 'flex',
+    flexDirection: 'row'
+  },
+  boardRow: {
+    borderWidth: 1,
+    borderColor: 'white',
+    borderStyle: 'solid'
+  },
+  boardCell: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'white',
+    borderStyle: 'solid',
+    padding: 20
+  },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
