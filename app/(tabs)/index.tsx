@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { StyleSheet, Button } from 'react-native';
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -9,55 +10,68 @@ interface GameState {
   board: number[][]
   solution: number[][]
   selectedCell: number[]
+  isNewGame: boolean
   setCellValue: (newNumber: number, cellCoordinates: number[]) => void
   setSelectedCell: (cellCoordinates: number[]) => void
   setBoard: (newBoard: number[][]) => void
   setSolution: (solutionBoard: number[][]) => void
+  setIsNewGame: (isNewGame: boolean) => void
 }
 
-const useGameStore = create<GameState>()((set, get) => ({
-  board: Array(9).fill(null).map(() => Array(9).fill(0)),
-  solution: [],
-  selectedCell: [-1, -1],
-  setBoard: (newBoard) => set(() => ({ board: newBoard })),
-  setSolution: (solutionBoard) => set(() => ({ solution: solutionBoard })),
-  setCellValue: (newNumber, cellCoordinates) => {
-    if (
-      (cellCoordinates[0] < 0 || cellCoordinates[0] > 9) ||
-      (cellCoordinates[1] < 0 || cellCoordinates[1] > 9)
-    ) {
-      // Invalid coordinates
-      return
+const useGameStore = create<GameState>()(
+  persist(
+      (set, get) => ({
+        board: Array(9).fill(null).map(() => Array(9).fill(0)),
+        solution: [],
+        selectedCell: [-1, -1],
+        isNewGame: true,
+        setBoard: (newBoard) => set(() => ({ board: newBoard })),
+        setIsNewGame: (isNewGame) => set(() => ({ isNewGame })),
+        setSolution: (solutionBoard) => set(() => ({ solution: solutionBoard })),
+        setCellValue: (newNumber, cellCoordinates) => {
+          if (
+            (cellCoordinates[0] < 0 || cellCoordinates[0] > 9) ||
+            (cellCoordinates[1] < 0 || cellCoordinates[1] > 9)
+          ) {
+            // Invalid coordinates
+            return
+          }
+
+          if (newNumber < 0 || newNumber > 9) {
+            // Invalid input
+            return
+          }
+
+          const [targetRow, targetColumn] = cellCoordinates
+          const gameBoard = get().board
+
+          if (gameBoard[targetRow][targetColumn] !== 0) {
+            // Cell is populated
+            return
+          }
+
+          const newGameBoard = [...gameBoard]
+
+          newGameBoard[targetRow][targetColumn] = newNumber
+          set(() => ({ board: newGameBoard }))
+        },
+        setSelectedCell: (cellCoordinates) => {
+          const [row, col] = cellCoordinates
+
+          if ((row < 0 || row > 9) || (col < 0 || col > 9)) {
+            return
+          }
+
+          set(() => ({ selectedCell: cellCoordinates }))
+        }
+      }
+    ),
+    {
+      name: 'current-game',
+      storage: createJSONStorage(() => sessionStorage)
     }
-
-    if (newNumber < 0 || newNumber > 9) {
-      // Invalid input
-      return
-    }
-
-    const [targetRow, targetColumn] = cellCoordinates
-    const gameBoard = get().board
-
-    if (gameBoard[targetRow][targetColumn] !== 0) {
-      // Cell is populated
-      return
-    }
-
-    const newGameBoard = [...gameBoard]
-
-    newGameBoard[targetRow][targetColumn] = newNumber
-    set(() => ({ board: newGameBoard }))
-  },
-  setSelectedCell: (cellCoordinates) => {
-    const [row, col] = cellCoordinates
-
-    if ((row < 0 || row > 9) || (col < 0 || col > 9)) {
-      return
-    }
-
-    set(() => ({ selectedCell: cellCoordinates }))
-  }
-}))
+  )
+)
 
 function PlayBoard() {
   const board = useGameStore((state) => state.board)
@@ -66,6 +80,8 @@ function PlayBoard() {
   const setCellValue = useGameStore((state) => state.setCellValue)
   const selectedCell = useGameStore((state) => state.selectedCell)
   const setSelectedCell = useGameStore((state) => state.setSelectedCell)
+  const isNewGame = useGameStore((state) => state.isNewGame)
+  const setIsNewGame = useGameStore((state) => state.setIsNewGame)
   
 
   useEffect(() => {
@@ -75,9 +91,12 @@ function PlayBoard() {
 
       setBoard(json.newboard.grids[0].value)
       setSolution(json.newboard.grids[0].solution)
+      setIsNewGame(false)
     }
 
-    fetchBoard().catch(console.error)
+    if (isNewGame) {
+      fetchBoard().catch(console.error)
+    }
   }, [])
 
   return (
