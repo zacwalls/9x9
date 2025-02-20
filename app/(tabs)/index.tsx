@@ -1,39 +1,27 @@
 import { useEffect, useState } from 'react'
-import { Image, StyleSheet, Platform, Button } from 'react-native';
+import { StyleSheet, Button } from 'react-native';
+import { create } from 'zustand'
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
-function PlayBoard() {
-  const [activeCell, setActiveCell] = useState([-1, -1])
-  const [solution, setSolution] = useState([[]])
-  const [gameBoard, setGameBoard] = useState([
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  ])
+interface GameState {
+  board: number[][]
+  solution: number[][]
+  selectedCell: number[]
+  setCellValue: (newNumber: number, cellCoordinates: number[]) => void
+  setSelectedCell: (cellCoordinates: number[]) => void
+  setBoard: (newBoard: number[][]) => void
+  setSolution: (solutionBoard: number[][]) => void
+}
 
-  useEffect(() => {
-    const fetchBoard = async () => {
-      const data = await fetch('https://sudoku-api.vercel.app/api/dosuku')
-      const json = await data.json()
-
-      setGameBoard(json.newboard.grids[0].value)
-      setSolution(json.newboard.grids[0].solution)
-    }
-
-    fetchBoard().catch(console.error)
-  }, [])
-
-  function updateCell(newNumber: number, cellCoordinates: number[]) {
+const useGameStore = create<GameState>()((set, get) => ({
+  board: Array(9).fill(null).map(() => Array(9).fill(0)),
+  solution: [],
+  selectedCell: [-1, -1],
+  setBoard: (newBoard) => set(() => ({ board: newBoard })),
+  setSolution: (solutionBoard) => set(() => ({ solution: solutionBoard })),
+  setCellValue: (newNumber, cellCoordinates) => {
     if (
       (cellCoordinates[0] < 0 || cellCoordinates[0] > 9) ||
       (cellCoordinates[1] < 0 || cellCoordinates[1] > 9)
@@ -47,23 +35,55 @@ function PlayBoard() {
       return
     }
 
-    const [targetRow, targetValue] = cellCoordinates
+    const [targetRow, targetColumn] = cellCoordinates
+    const gameBoard = get().board
 
-    if (gameBoard[targetRow][targetValue] !== 0) {
+    if (gameBoard[targetRow][targetColumn] !== 0) {
       // Cell is populated
       return
     }
 
     const newGameBoard = [...gameBoard]
 
-    newGameBoard[targetRow][targetValue] = newNumber
-    setGameBoard(newGameBoard)
+    newGameBoard[targetRow][targetColumn] = newNumber
+    set(() => ({ board: newGameBoard }))
+  },
+  setSelectedCell: (cellCoordinates) => {
+    const [row, col] = cellCoordinates
+
+    if ((row < 0 || row > 9) || (col < 0 || col > 9)) {
+      return
+    }
+
+    set(() => ({ selectedCell: cellCoordinates }))
   }
+}))
+
+function PlayBoard() {
+  const board = useGameStore((state) => state.board)
+  const setBoard = useGameStore((state) => state.setBoard)
+  const setSolution = useGameStore((state) => state.setSolution)
+  const setCellValue = useGameStore((state) => state.setCellValue)
+  const selectedCell = useGameStore((state) => state.selectedCell)
+  const setSelectedCell = useGameStore((state) => state.setSelectedCell)
+  
+
+  useEffect(() => {
+    const fetchBoard = async () => {
+      const data = await fetch('https://sudoku-api.vercel.app/api/dosuku')
+      const json = await data.json()
+
+      setBoard(json.newboard.grids[0].value)
+      setSolution(json.newboard.grids[0].solution)
+    }
+
+    fetchBoard().catch(console.error)
+  }, [])
 
   return (
     <div>
       <div style={styles.board}>
-        {gameBoard.map((row, rowNumber) => (
+        {board.map((row, rowNumber) => (
           <div
             key={rowNumber}
             style={styles.boardRow}
@@ -76,9 +96,9 @@ function PlayBoard() {
                   borderBottomColor: 'white',
                   borderStyle: 'solid',
                   padding: 20,
-                  backgroundColor: (activeCell[0] === rowNumber && activeCell[1] === columnNumber) ? 'blue' : 'transparent'
+                  backgroundColor: (selectedCell[0] === rowNumber && selectedCell[1] === columnNumber) ? 'blue' : 'transparent'
                 }}
-                onClick={() => setActiveCell([rowNumber, columnNumber])}
+                onClick={() => setSelectedCell([rowNumber, columnNumber])}
               >
                 <ThemedText>{cellValue === 0 ? ' ' : cellValue}</ThemedText>
               </div>
@@ -91,7 +111,7 @@ function PlayBoard() {
           <Button
             key={`button-${number}`}
             title={number.toString()}
-            onPress={() => updateCell(number, activeCell)}
+            onPress={() => setCellValue(number, selectedCell)}
           />
         ))}
       </div>
