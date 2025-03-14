@@ -6,11 +6,48 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
+class MoveHistoryNode {
+  value: number[]
+  next: MoveHistoryNode | null
+
+  constructor(value: number[]) {
+    this.value = value
+    this.next = null
+  }
+}
+
+class MoveHistory {
+  top: MoveHistoryNode | null
+
+  constructor() {
+    this.top = null
+  }
+
+  pop() {
+    if (this.top === null) {
+      return null
+    }
+
+    const poppedValue = this.top.value
+    this.top = this.top.next
+
+    return poppedValue
+  }
+
+  push(value: number[]) {
+    const newNode = new MoveHistoryNode(value)
+    newNode.next = this.top
+    this.top = newNode
+  }
+}
+
 interface GameState {
   board: number[][]
   solution: number[][]
   selectedCell: number[]
   isNewGame: boolean
+  history: number[][]
+  undo: () => void
   setCellValue: (newNumber: number, cellCoordinates: number[]) => void
   setSelectedCell: (cellCoordinates: number[]) => void
   setBoard: (newBoard: number[][]) => void
@@ -25,9 +62,24 @@ const useGameStore = create<GameState>()(
         solution: [],
         selectedCell: [-1, -1],
         isNewGame: true,
+        history: [],
         setBoard: (newBoard) => set(() => ({ board: newBoard })),
         setIsNewGame: (isNewGame) => set(() => ({ isNewGame })),
         setSolution: (solutionBoard) => set(() => ({ solution: solutionBoard })),
+        undo: () => {
+          const historyStack = get().history
+          const gameBoard = get().board
+
+          if (historyStack.length <= 0) {
+            return
+          }
+
+          const [row, col] = historyStack.pop() as number[]
+          const newGameBoard = [...gameBoard]
+
+          newGameBoard[row][col] = 0
+          set(() => ({ board: newGameBoard, history: historyStack }))
+        },
         setCellValue: (newNumber, cellCoordinates) => {
           if (
             (cellCoordinates[0] < 0 || cellCoordinates[0] > 9) ||
@@ -50,10 +102,12 @@ const useGameStore = create<GameState>()(
             return
           }
 
+          const historyStack = get().history
           const newGameBoard = [...gameBoard]
 
+          historyStack.push(cellCoordinates)
           newGameBoard[targetRow][targetColumn] = newNumber
-          set(() => ({ board: newGameBoard }))
+          set(() => ({ board: newGameBoard, history: historyStack }))
         },
         setSelectedCell: (cellCoordinates) => {
           const [row, col] = cellCoordinates
@@ -82,7 +136,7 @@ function PlayBoard() {
   const setSelectedCell = useGameStore((state) => state.setSelectedCell)
   const isNewGame = useGameStore((state) => state.isNewGame)
   const setIsNewGame = useGameStore((state) => state.setIsNewGame)
-  
+  const undo = useGameStore((state) => state.undo)
 
   useEffect(() => {
     const fetchBoard = async () => {
@@ -133,6 +187,11 @@ function PlayBoard() {
             onPress={() => setCellValue(number, selectedCell)}
           />
         ))}
+          <Button
+            key='undo'
+            title="Undo"
+            onPress={() => undo()}
+          />
       </div>
     </div>
   )
