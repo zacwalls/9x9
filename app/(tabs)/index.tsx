@@ -22,7 +22,7 @@ class Sudoku {
   constructor(difficulty: SudokuDifficulty) {
     this.difficulty = difficulty
     this.solution = this.generateFullBoard()
-    // this.board = this.removeNumbers(this.solution)
+    this.board = this.removeNumbers(this.solution)
   }
 
   /** Checks a given value is valid in a specified cell */
@@ -35,8 +35,8 @@ class Sudoku {
     }
 
     // Check local 3x3 grid for value
-    const localX = Math.floor(row / 3)
-    const localY = Math.floor(col / 3)
+    const localX = Math.floor(row / 3) * 3
+    const localY = Math.floor(col / 3) * 3
 
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++) {
@@ -49,57 +49,26 @@ class Sudoku {
     return true
   }
 
-  // solve() {
-  //   for (let row = 0; row < 9; row++) {
-  //     for (let col = 0; col < 9; col++) {
-  //       if (this.board[row][col] === 0) {
-  //         for (let num = 0; num < 9; num++) {
-  //           if (this.isValid(row, col, num)) {
-  //             this.board[row][col] = num
-  
-  //             if (this.solve()) {
-  //               return true
-  //             }
-  
-  //             this.board[row][col] = 0
-  //           }
-  //         }
-
-  //         return false
-  //       }
-  //     }
-  //   }
-
-  //   return true
-  // }
-
-  /** 
-   * Fisher-Yates Shuffle 
-   * 
-   * Re-arranges elements in an array randomly
+  /**
+   * Shuffle an array in-place using Fisher-Yates algorithm.
    */
-  shuffleRow(row: number[] | number[][]) {
-    for (let i = row.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      const aux = row[j]
-
-      row[j] = row[i]
-      row[i] = aux
+  shuffleArray<T>(array: T[]) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
     }
-
-    return row
   }
 
   /** Generate complete and valid sudoku */
   generateFullBoard() {
-    const board = Array(9).fill(null).map(() => Array(9).fill(0)) as number[][]
+    const board = Array(9).fill(null).map(() => Array(9).fill(0))
+
     const fillBoard = () => {
       for (let row = 0; row < 9; row++) {
         for (let col = 0; col < 9; col++) {
           if (board[row][col] === 0) {
             const numbers = Array.from({ length: 9 }, (_, i) => i + 1);
-
-            this.shuffleRow(numbers)
+            this.shuffleArray(numbers)
 
             for (let number of numbers) {
               if (this.isValid(board, row, col, number)) {
@@ -112,67 +81,66 @@ class Sudoku {
                 board[row][col] = 0
               }
             }
-
             return false
           }
         }
       }
-
       return true
     }
 
     fillBoard()
-
     return board
   }
 
   /** Verifies uniqueness of solution */
   isUnique(board: number[][]) {
-    const solutions = []
-    const findSolutions = (board: number[][]) => {
+    const solutions: number[][][] = []
+
+    const findSolutions = (b: number[][]) => {
+      if (solutions.length > 1) return;
+
       for (let row = 0; row < 9; row++) {
         for (let col = 0; col < 9; col++) {
-          if (board[row][col] === 0) {
-            for (let number = 0; number < 9; number++) {
-              if (this.isValid(board, row, col, number)) {
-                board[row][col] = number
-                findSolutions(board)
-                board[row][col] = 0
+          if (b[row][col] === 0) {
+            for (let number = 1; number <= 9; number++) {
+              if (this.isValid(b, row, col, number)) {
+                b[row][col] = number
+                findSolutions(b)
+                b[row][col] = 0
               }
             }
-
             return
           }
         }
       }
 
-      solutions.push([...board])
-
-      if (solutions.length > 1) {
-        return
-      }
+      solutions.push(b.map(row => [...row]))
     }
 
     findSolutions(board)
-
     return solutions.length === 1
   }
 
   /** Removes numbers from full board given difficulty */
   removeNumbers(board: number[][]) {
     const givens = this.GIVENS[this.difficulty]
-    const puzzle = [...board]
-    const cells = [...Array(9).keys()].flatMap(r => [...Array(9).keys()].map(c => [r, c]))
+    const puzzle = board.map(row => [...row]);
+    let cells = []
 
-    this.shuffleRow(cells)
+    for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+            cells.push([r, c])
+        }
+    }
+
+    this.shuffleArray(cells)
 
     while(cells.length > givens) {
-      const [row, col] = cells.pop() as number[]
+      const [row, col] = cells.pop()!
       const tmp = puzzle[row][col]
-
       puzzle[row][col] = 0
 
-      const tmpPuzzle = [...puzzle]
+      const tmpPuzzle = puzzle.map(row => [...row])
 
       if (!this.isUnique(tmpPuzzle)) {
         puzzle[row][col] = tmp
@@ -202,7 +170,7 @@ interface GameState {
 const useGameStore = create<GameState>()(
   persist(
       (set, get) => ({
-        board: Array(9).fill(null).map(() => Array(9).fill(0)),
+        board: [],
         solution: [],
         selectedCell: [-1, -1],
         isNewGame: true,
@@ -300,20 +268,11 @@ function PlayBoard() {
   const isWon = useGameStore((state) => state.isWon)
 
   useEffect(() => {
-    const fetchBoard = async () => {
-      // const data = await fetch('https://sudoku-api.vercel.app/api/dosuku')
-      // const json = await data.json()
-
-      // setBoard(json.newboard.grids[0].value)
-      // setSolution(json.newboard.grids[0].solution)
-      const puzzle = new Sudoku('easy')
+    if (isNewGame) {
+      const puzzle = new Sudoku('evil')
       setBoard(puzzle.board)
       setSolution(puzzle.solution)
       setIsNewGame(false)
-    }
-
-    if (isNewGame) {
-      fetchBoard().catch(console.error)
     }
   }, [])
 
@@ -322,29 +281,39 @@ function PlayBoard() {
   }
 
   return (
-    <div>
+    <div 
+      style={{
+        minWidth: '400px',
+        maxWidth: '100vmin',
+        display: 'flex',
+        flexDirection: 'column',
+        marginLeft: 'auto',
+        marginRight: 'auto'
+      }}
+    >
       <div style={styles.board}>
         {board.map((row, rowNumber) => (
-          <div
-            key={rowNumber}
-            style={styles.boardRow}
-          >
-            {row.map((cellValue, columnNumber) => (
+            row.map((cellValue, columnNumber) => (
               <div
                 key={`${rowNumber}-${columnNumber}`}
                 style={{
-                  borderBottomWidth: 1,
-                  borderBottomColor: 'white',
+                  borderWidth: 1,
+                  borderColor: 'white',
                   borderStyle: 'solid',
-                  padding: 20,
+                  flexBasis: 'calc(100% / 9)',
+                  textAlign: 'center',
+                  lineHeight: '63px',
+                  fontSize: '63px',
+                  height: '63px',
+                  boxSizing: 'border-box',
+                  color: 'white',
                   backgroundColor: (selectedCell[0] === rowNumber && selectedCell[1] === columnNumber) ? 'blue' : 'transparent'
                 }}
                 onClick={() => setSelectedCell([rowNumber, columnNumber])}
               >
-                <ThemedText>{cellValue === 0 ? ' ' : cellValue}</ThemedText>
+                {cellValue === 0 ? ' ' : cellValue}
               </div>
-            ))}
-          </div>
+            ))
         ))}
       </div>
       <div style={styles.numberBoard}>
@@ -378,13 +347,10 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   board: {
+    width: '100%',
     display: 'flex',
-    flexDirection: 'row'
-  },
-  boardRow: {
-    borderWidth: 1,
-    borderColor: 'white',
-    borderStyle: 'solid'
+    flexDirection: 'row',
+    flexWrap: 'wrap'
   },
   boardCell: {
     borderBottomWidth: 1,
