@@ -35,25 +35,42 @@ export function App() {
         {board.map((row, rowNumber) =>
           row.map((cellValue, columnNumber) => {
             const linearIndex = rowNumber * 9 + columnNumber
-            let borderStyle = ''
+            let style = ''
 
             if (verticalSubgridDividerCells.includes(linearIndex)) {
-              borderStyle += 'border-right: 2px black;'
+              style += 'border-right: 2px black;'
             }
 
             if (horizontalSubgridDividerCells.includes(linearIndex)) {
-              borderStyle += 'border-bottom: 2px black;'
+              style += 'border-bottom: 2px black;'
             }
 
-            return <text className='game-grid-cell' style={borderStyle}>{cellValue === 0 ? ' ' : cellValue.toString()}</text>
+            if (selectedCell[0] === rowNumber && selectedCell[1] === columnNumber) {
+              style += 'background-color: blue;'
+            }
+
+            return (
+              <text 
+                className='game-grid-cell'
+                style={style}
+                bindtap={() => setSelectedCell([rowNumber, columnNumber])}
+              >
+                {cellValue === 0 ? ' ' : cellValue.toString()}
+              </text>
+            )
           })
         )}
       </view>
       <view className="game-inputs">
         {Array.from({ length: 9 }, (_, i) => i + 1).map(number =>
-          <text className="game-input">{number}</text>
+          <text
+            className="game-input"
+            bindtap={() => setCellValue(number, selectedCell)}
+          >
+            {number}
+          </text>
         )}
-        <text className="game-input undo">↶</text>
+        <text className="game-input undo" bindtap={() => undo()}>↶</text>
       </view>
     </view>
   )
