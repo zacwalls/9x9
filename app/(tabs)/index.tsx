@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { StyleSheet, Button } from 'react-native';
+import { StyleSheet, TouchableWithoutFeedback, View, Text, Dimensions } from 'react-native';
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 
@@ -254,6 +254,8 @@ const useGameStore = create<GameState>()(
   )
 )
 
+const windowWidth = Dimensions.get('window').width
+
 function PlayBoard() {
   const board = useGameStore((state) => state.board)
   const setBoard = useGameStore((state) => state.setBoard)
@@ -281,65 +283,57 @@ function PlayBoard() {
   }
 
   return (
-    <div 
+    <View 
       style={{
-        minWidth: '400px',
-        maxWidth: '100vmin',
         display: 'flex',
         flexDirection: 'column',
         marginLeft: 'auto',
-        marginRight: 'auto'
+        marginRight: 'auto',
+        gap: 240
       }}
     >
-      <div style={styles.board}>
+      <View style={styles.board}>
         {board.map((row, rowNumber) => (
             row.map((cellValue, columnNumber) => (
-              <div
+              <Text
                 key={`${rowNumber}-${columnNumber}`}
-                style={{
-                  borderWidth: 1,
-                  borderColor: 'white',
-                  borderStyle: 'solid',
-                  flexBasis: 'calc(100% / 9)',
-                  textAlign: 'center',
-                  lineHeight: '63px',
-                  fontSize: '63px',
-                  height: '63px',
-                  boxSizing: 'border-box',
-                  color: 'white',
-                  backgroundColor: (selectedCell[0] === rowNumber && selectedCell[1] === columnNumber) ? 'blue' : 'transparent'
-                }}
-                onClick={() => setSelectedCell([rowNumber, columnNumber])}
+                style={[
+                  styles.boardCell,
+                  (selectedCell[0] === rowNumber && selectedCell[1] === columnNumber) ? styles.boardCellSelected : null
+                ]}
+                onPress={() => setSelectedCell([rowNumber, columnNumber])}
               >
                 {cellValue === 0 ? ' ' : cellValue}
-              </div>
+              </Text>
             ))
         ))}
-      </div>
-      <div style={styles.numberBoard}>
+      </View>
+      <View style={styles.numberBoard}>
         {Array.from({ length: 9 }, (_, i) => i + 1).map(number => (
-          <Button
+          <TouchableWithoutFeedback
             key={`button-${number}`}
-            title={number.toString()}
             onPress={() => {
               setCellValue(number, selectedCell)
               validateWin()
             }}
-          />
+          >
+            <Text style={styles.numberBoardButton}>{number}</Text>
+          </TouchableWithoutFeedback>
         ))}
-          <Button
+          <TouchableWithoutFeedback
             key='undo'
-            title="Undo"
             onPress={() => undo()}
-          />
-      </div>
-    </div>
+          >
+            <Text style={styles.numberBoardButton}>↶</Text>
+          </TouchableWithoutFeedback>
+      </View>
+    </View>
   )
 }
 
 export default function HomeScreen() {
   return (
-    <ThemedView>
+    <ThemedView style={{ height: Dimensions.get('window').height }}>
       <PlayBoard />
     </ThemedView>
   );
@@ -347,26 +341,48 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   board: {
-    width: '100%',
     display: 'flex',
     flexDirection: 'row',
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
+    width: windowWidth * 0.9,
+    height: windowWidth * 0.9,
+    paddingVertical: 60
+  },
+  boardCellSelected: {
+    backgroundColor: 'blue'
   },
   boardCell: {
-    borderBottomWidth: 1,
-    borderBottomColor: 'white',
+    borderWidth: 1,
+    borderColor: 'white',
     borderStyle: 'solid',
-    padding: 20
+    boxSizing: 'border-box',
+    color: 'white',
+    flexBasis: '11%',
+    fontSize: windowWidth * 0.1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center'
   },
   boardContainer: {
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
   },
   numberBoard: {
     display: 'flex',
-    gap: '10px'
+    flexDirection: 'row',
+    gap: 5,
+    flexWrap: 'wrap',
+    justifyContent: 'center'
   },
   numberBoardButton: {
-    padding: 20
+    fontSize: windowWidth * 0.1,
+    borderWidth: 1,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    textAlign: 'center',
+    borderColor: 'white',
+    color: 'white'
   }
 });
