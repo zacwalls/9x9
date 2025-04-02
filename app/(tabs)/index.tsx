@@ -1,6 +1,8 @@
 import { View, Text, TouchableOpacity } from 'react-native'
 
 import GameBoard from '@/components/GameBoard'
+import GameTimer from '@/components/GameTimer'
+import GameBoardInputs from '@/components/GameBoardInputs'
 import useGameStore from '@/hooks/useGameStore'
 
 function WonScreen() {
@@ -28,7 +30,13 @@ export default function GameScreen() {
 
   return (
     <View className='flex h-full flex-col justify-around items-center'>
-      {isWon ? <WonScreen /> : <GameBoard />}
+      {isWon ? <WonScreen />
+      : <>
+        <GameTimer />
+        <GameBoard />
+        <GameBoardInputs />
+      </>
+      }
     </View>
   )
 }
