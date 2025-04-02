@@ -14,6 +14,7 @@ interface GameState {
     setBoard: (newBoard: number[][]) => void
     setSolution: (solutionBoard: number[][]) => void
     setIsNewGame: (isNewGame: boolean) => void
+    setWon: (isWon: boolean) => void
 }
 
 export default create<GameState>()(
@@ -27,6 +28,7 @@ export default create<GameState>()(
         setBoard: (newBoard) => set(() => ({ board: newBoard })),
         setIsNewGame: (isNewGame) => set(() => ({ isNewGame })),
         setSolution: (solutionBoard) => set(() => ({ solution: solutionBoard })),
+        setWon: (isWon) => set(() => ({ isWon })),
         validateWin: () => {
             const gameBoard = get().board
             const solutionBoard = get().solution
