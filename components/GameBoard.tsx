@@ -5,6 +5,7 @@ import Sudoku from '@/utils/Sudoku'
 import useGameStore from "@/hooks/useGameStore"
 import GameBoardCell from "./GameBoardCell"
 import GameBoardInputs from "./GameBoardInputs"
+import GameTimer from "./GameTimer"
 
 export default function GameBoard() {
     const board = useGameStore((state) => state.board)
@@ -27,6 +28,7 @@ export default function GameBoard() {
   
     return (
       <>
+        <GameTimer />
         <View className='flex flex-wrap flex-row w-[400px] h-[500px]'>
           {board.map((row, rowNumber) =>
             row.map((cellValue, columnNumber) =>
