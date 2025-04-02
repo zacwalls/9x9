@@ -7,6 +7,7 @@ interface GameState {
     isNewGame: boolean
     history: number[][]
     isWon: boolean
+    selectedGrid: number[][]
     validateWin: () => void
     undo: () => void
     setCellValue: (newNumber: number, cellCoordinates: number[]) => void
@@ -22,6 +23,7 @@ export default create<GameState>()(
         board: [],
         solution: [],
         selectedCell: [-1, -1],
+        selectedGrid: [],
         isNewGame: true,
         history: [],
         isWon: false,
@@ -88,12 +90,21 @@ export default create<GameState>()(
         },
         setSelectedCell: (cellCoordinates) => {
             const [row, col] = cellCoordinates
+            const localX = Math.floor(row / 3) * 3
+            const localY = Math.floor(col / 3) * 3
+            const selectedGrid: number[][] = []
 
             if ((row < 0 || row > 9) || (col < 0 || col > 9)) {
                 return
             }
 
-            set(() => ({ selectedCell: cellCoordinates }))
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    selectedGrid.push([localX + i, localY + j])
+                }
+            }
+
+            set(() => ({ selectedCell: cellCoordinates, selectedGrid }))
         }
     })
 )

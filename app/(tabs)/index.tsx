@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { View, Text, TouchableOpacity } from 'react-native'
 
-import { Sudoku } from '@/utils/Sudoku'
+import Sudoku from '@/utils/Sudoku'
 import useGameStore from '@/hooks/useGameStore'
 
 function GameBoard() {
@@ -15,6 +15,7 @@ function GameBoard() {
   const setIsNewGame = useGameStore((state) => state.setIsNewGame)
   const undo = useGameStore((state) => state.undo)
   const validateWin = useGameStore((state) => state.validateWin)
+  const selectedGrid = useGameStore((state) => state.selectedGrid)
   // const verticalSubgridDividerCells = [2, 11, 20, 29, 38, 47, 56, 65, 74, 5, 14, 23, 32, 41, 50, 59, 68, 77]
   // const horizontalSubgridDividerCells = [18, 19, 20, 21, 22, 23, 24, 25, 26, 45, 46, 47, 48, 49, 50, 51, 52, 53]
 
@@ -32,10 +33,16 @@ function GameBoard() {
       <View className='flex flex-wrap flex-row w-[400px] h-[500px]'>
         {board.map((row, rowNumber) =>
           row.map((cellValue, columnNumber) => {
-
+            const isSelectedCell = (selectedCell[0] === rowNumber && selectedCell[1] === columnNumber)
             let classNames = 'flex justify-center items-center basis-[calc(100%/9)] border border-white border-collapse'
-            
-            if (selectedCell[0] === rowNumber && selectedCell[1] === columnNumber) {
+
+            selectedGrid.forEach(cell => {
+              if (rowNumber === cell[0] && columnNumber === cell[1] && !isSelectedCell) {
+                classNames += ' bg-gray-500'
+              }
+            })
+
+            if (isSelectedCell) {
               classNames += ' bg-blue-500'
             } else if (selectedCell[0] === rowNumber || selectedCell[1] === columnNumber) {
               classNames += ' bg-gray-500'

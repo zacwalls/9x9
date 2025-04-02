@@ -1,6 +1,6 @@
 export type SudokuDifficulty = 'easy' | 'medium' | 'hard' | 'evil'
 
-export class Sudoku {
+export default class Sudoku {
   board: number[][]
   solution: number[][]
   difficulty: SudokuDifficulty
