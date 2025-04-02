@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { View, Text, TouchableOpacity } from 'react-native'
 
 import { Sudoku } from '@/utils/Sudoku'
@@ -24,7 +24,6 @@ function GameBoard() {
       setBoard(puzzle.board)
       setSolution(puzzle.solution)
       setIsNewGame(false)
-      console.log(puzzle.solution)
     }
   }, [])
 
@@ -35,9 +34,11 @@ function GameBoard() {
           row.map((cellValue, columnNumber) => {
 
             let classNames = 'flex justify-center items-center basis-[calc(100%/9)] border border-white border-collapse'
-
+            
             if (selectedCell[0] === rowNumber && selectedCell[1] === columnNumber) {
               classNames += ' bg-blue-500'
+            } else if (selectedCell[0] === rowNumber || selectedCell[1] === columnNumber) {
+              classNames += ' bg-gray-500'
             }
 
             return (
