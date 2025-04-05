@@ -3,7 +3,7 @@ import { View } from 'react-native'
 
 import Sudoku from '@/utils/Sudoku'
 import useGameStore from "@/hooks/useGameStore"
-import GameBoardCell from "./GameBoardCell"
+import GameBoardCell from "@/components/GameBoardCell"
 
 
 export default function GameBoard() {

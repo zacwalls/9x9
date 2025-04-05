@@ -29,7 +29,7 @@ export default function GameScreen() {
   const isWon = useGameStore((state) => state.isWon)
 
   return (
-    <View className='flex h-full flex-col justify-around items-center'>
+    <View className='flex h-full flex-col justify-around items-center bg-black'>
       {isWon ? <WonScreen />
       : <>
         <GameTimer />
