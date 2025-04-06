@@ -1,9 +1,11 @@
 import { View, Text, TouchableOpacity } from 'react-native'
+import { useLocalSearchParams } from 'expo-router'
 
 import GameBoard from '@/components/GameBoard'
 import GameTimer from '@/components/GameTimer'
 import GameBoardInputs from '@/components/GameBoardInputs'
 import useGameStore from '@/hooks/useGameStore'
+import { SudokuDifficulty } from '@/utils/Sudoku'
 
 function WonScreen() {
   const setWon = useGameStore((state) => state.setWon)
@@ -26,6 +28,8 @@ function WonScreen() {
 }
 
 export default function GameScreen() {
+  const { difficulty } = useLocalSearchParams()
+  console.log(difficulty)
   const isWon = useGameStore((state) => state.isWon)
 
   return (
@@ -33,7 +37,7 @@ export default function GameScreen() {
       {isWon ? <WonScreen />
       : <>
         <GameTimer />
-        <GameBoard />
+        <GameBoard difficulty={difficulty as SudokuDifficulty} />
         <GameBoardInputs />
       </>
       }

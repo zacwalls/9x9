@@ -115,7 +115,7 @@ export default create<GameState>()(
             }
         }),
         {
-            name: 'game-storage',
+            name: 'game',
             storage: createJSONStorage(() => AsyncStorage)
         })
 )

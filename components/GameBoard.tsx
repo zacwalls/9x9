@@ -1,12 +1,12 @@
 import { useEffect } from "react"
 import { View } from 'react-native'
 
-import Sudoku from '@/utils/Sudoku'
+import Sudoku, { SudokuDifficulty } from '@/utils/Sudoku'
 import useGameStore from "@/hooks/useGameStore"
 import GameBoardCell from "@/components/GameBoardCell"
 
 
-export default function GameBoard() {
+export default function GameBoard({ difficulty }: { difficulty: SudokuDifficulty }) {
     const board = useGameStore((state) => state.board)
     const setBoard = useGameStore((state) => state.setBoard)
     const setSolution = useGameStore((state) => state.setSolution)
@@ -18,10 +18,12 @@ export default function GameBoard() {
 
     useEffect(() => {
         if (isNewGame) {
-            const puzzle = new Sudoku('easy')
+            const puzzle = new Sudoku(difficulty)
             setBoard(puzzle.board)
             setSolution(puzzle.solution)
             setIsNewGame(false)
+            useGameStore.persist.setOptions({ name: `${difficulty}` })
+            useGameStore.persist.rehydrate()
         }
     }, [])
 

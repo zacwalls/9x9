@@ -1,4 +1,5 @@
-export type SudokuDifficulty = 'easy' | 'medium' | 'hard' | 'evil'
+export const sudokuDifficulty = ['easy', 'medium', 'hard', 'evil'] as const
+export type SudokuDifficulty = typeof sudokuDifficulty[number]
 
 export default class Sudoku {
   board: number[][]
