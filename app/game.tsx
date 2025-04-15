@@ -6,6 +6,7 @@ import GameTimer from '@/components/GameTimer'
 import GameBoardInputs from '@/components/GameBoardInputs'
 import useGameStore from '@/hooks/useGameStore'
 import { SudokuDifficulty } from '@/utils/Sudoku'
+import { useEffect } from 'react'
 
 function WonScreen() {
   const setWon = useGameStore((state) => state.setWon)
@@ -29,7 +30,6 @@ function WonScreen() {
 
 export default function GameScreen() {
   const { difficulty } = useLocalSearchParams()
-  console.log(difficulty)
   const isWon = useGameStore((state) => state.isWon)
 
   return (

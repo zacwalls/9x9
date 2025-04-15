@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Text, View, TouchableOpacity } from "react-native";
 import { Link } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import useGameStore from '@/hooks/useGameStore'
 import { SudokuDifficulty, sudokuDifficulty } from "@/utils/Sudoku";
 
 function DifficultySelector({ setDifficulty }: { setDifficulty: React.Dispatch<React.SetStateAction<SudokuDifficulty>> }) {
@@ -38,31 +40,36 @@ function DifficultySelector({ setDifficulty }: { setDifficulty: React.Dispatch<R
 
 export default function Index() {
   const [difficulty, setDifficulty] = useState<SudokuDifficulty>('easy')
-  let savedGames = [] as string[]
+  const [savedGames, setSavedGames] = useState<SudokuDifficulty[]>([])
 
   useEffect(() => {
     (async () => {
-      let keys = [] as string[]
+      let keys = [] as SudokuDifficulty[]
 
       try {
-        keys = await AsyncStorage.getAllKeys() as string[]
+        keys = await AsyncStorage.getAllKeys() as SudokuDifficulty[]
       } catch (e) {
         console.error(e)
       }
 
-      savedGames = keys
+      setSavedGames(keys)
     })()
   }, [])
-
-
 
   return (
     <View className='bg-black h-full flex flex-col justify-center items-center gap-10'>
       <Text className='text-white text-5xl'>9x9</Text>
       <DifficultySelector setDifficulty={setDifficulty} />
+      {savedGames.includes(difficulty) &&
+        <Link
+          className='border border-white text-white text-2xl p-5'
+          href={{ pathname: '/game', params: { difficulty } }}
+        >
+          Resume
+        </Link>}
       <Link
         className='border border-white text-white text-2xl p-5'
-        href={{ pathname: '/game', params: { difficulty } }}
+        href={{ pathname: '/game', params: { difficulty, newGame: 'true' } }}
       >
         New Game
       </Link>

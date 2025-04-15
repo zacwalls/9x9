@@ -8,22 +8,26 @@ export default function GameBoardInputs() {
   const undo = useGameStore((state) => state.undo)
 
   return (
-    <View className='flex flex-row flex-wrap items-center justify-center gap-2'>
+    <View className='flex flex-row flex-wrap items-center justify-center gap-5'>
       {Array.from({ length: 9 }, (_, i) => i + 1).map(number =>
         <TouchableOpacity
+          className='flex justify-center items-center border border-white p-5'
           key={number}
           onPress={() => {
             setCellValue(number, selectedCell)
             validateWin()
           }}
         >
-          <Text className='text-white w-16 h-16 text-4xl border border-white text-center flex justify-center items-center'>
+          <Text className='text-white text-4xl text-center'>
             {number}
           </Text>
         </TouchableOpacity>
       )}
-      <TouchableOpacity onPress={() => undo()}>
-        <Text className='text-white w-16 h-16 text-5xl border border-white text-center flex justify-center items-center'>
+      <TouchableOpacity
+        className='flex justify-center items-center border border-white p-5'
+        onPress={() => undo()}
+      >
+        <Text className='text-white text-4xl text-center'>
           {'\u21b6'}
         </Text>
       </TouchableOpacity>
