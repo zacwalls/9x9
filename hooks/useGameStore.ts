@@ -11,6 +11,8 @@ interface GameState {
     isWon: boolean
     selectedGrid: number[][]
     gameTimeSeconds: number
+    gameTimerRunning: boolean
+    setGameTimerRunning: (gameTimerRunning: boolean) => void
     validateWin: () => void
     undo: () => void
     setCellValue: (newNumber: number, cellCoordinates: number[]) => void
@@ -33,6 +35,8 @@ export default create<GameState>()(
             history: [],
             isWon: false,
             gameTimeSeconds: 0,
+            gameTimerRunning: false,
+            setGameTimerRunning: (gameTimerRunning) => set(() => ({ gameTimerRunning })),
             setGameTimeSeconds: (gameTimeSeconds) => set(() => ({ gameTimeSeconds })),
             setBoard: (newBoard) => set(() => ({ board: newBoard })),
             setIsNewGame: (isNewGame) => set(() => ({ isNewGame })),

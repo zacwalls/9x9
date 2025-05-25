@@ -2,11 +2,11 @@ import { View, Text, TouchableOpacity } from 'react-native'
 import { useLocalSearchParams } from 'expo-router'
 
 import GameBoard from '@/components/GameBoard'
-import GameTimer from '@/components/GameTimer'
+import GameBoardNav from '@/components/GameBoardNav'
 import GameBoardInputs from '@/components/GameBoardInputs'
 import useGameStore from '@/hooks/useGameStore'
 import { SudokuDifficulty } from '@/utils/Sudoku'
-import { useEffect } from 'react'
+
 
 function WonScreen() {
   const setWon = useGameStore((state) => state.setWon)
@@ -33,10 +33,10 @@ export default function GameScreen() {
   const isWon = useGameStore((state) => state.isWon)
 
   return (
-    <View className='flex h-full flex-col justify-around items-center bg-black'>
+    <View className='flex h-full flex-col items-center bg-black'>
       {isWon ? <WonScreen />
       : <>
-        <GameTimer />
+        <GameBoardNav />
         <GameBoard difficulty={difficulty as SudokuDifficulty} />
         <GameBoardInputs />
       </>

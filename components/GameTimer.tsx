@@ -4,8 +4,8 @@ import { useEffect } from "react";
 import useGameStore from "@/hooks/useGameStore";
 
 function getGameTimeFromSeconds(time: number) {
-    let hours = Math.round(time / 3600)
-    let minutes = Math.round(time / 60)
+    let hours = Math.floor(time / 3600)
+    let minutes = Math.floor((time % 3600) / 60)
     let seconds = time % 60
     let timeString = ''
 
@@ -24,14 +24,19 @@ function getGameTimeFromSeconds(time: number) {
 export default function GameTimer() {
     const gameTime = useGameStore((state) => state.gameTimeSeconds)
     const setGameTime = useGameStore((state) => state.setGameTimeSeconds)
+    const gameTimerRunning = useGameStore((state) => state.gameTimerRunning)
 
     useEffect(() => {
+        if (!gameTimerRunning) {
+            return
+        }
+
         const intervalId = setInterval(() => {
             setGameTime(gameTime + 1)
         }, 1000)
 
         return () => clearInterval(intervalId);
-    }, [gameTime])
+    }, [gameTime, gameTimerRunning])
 
-    return <Text className='text-white text-xl'>{getGameTimeFromSeconds(gameTime)}</Text>
+    return <Text className='my-0 mx-auto p-10 text-white text-xl lg:text-lg lg:p-8'>{getGameTimeFromSeconds(gameTime)}</Text>
 }

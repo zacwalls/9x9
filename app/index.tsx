@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import useGameStore from '@/hooks/useGameStore'
 import { SudokuDifficulty, sudokuDifficulty } from "@/utils/Sudoku";
+import { useIsFocused } from "@react-navigation/native";
 
 function DifficultySelector({ setDifficulty }: { setDifficulty: React.Dispatch<React.SetStateAction<SudokuDifficulty>> }) {
   const [currentOption, setCurrentOption] = useState(0)
@@ -62,18 +63,17 @@ export default function Index() {
       <DifficultySelector setDifficulty={setDifficulty} />
       {savedGames.includes(difficulty) &&
         <Link
-          className='border border-white text-white text-2xl p-5'
+          className='border border-white text-white text-2xl text-center p-5 w-56'
           href={{ pathname: '/game', params: { difficulty } }}
         >
           Resume
         </Link>}
       <Link
-        className='border border-white text-white text-2xl p-5'
+        className='border border-white text-white text-2xl text-center p-5 w-56'
         href={{ pathname: '/game', params: { difficulty, newGame: 'true' } }}
       >
         New Game
       </Link>
-
     </View>
   );
 }
