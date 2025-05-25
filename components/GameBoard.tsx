@@ -16,7 +16,6 @@ export default function GameBoard({ difficulty }: { difficulty: SudokuDifficulty
     const setGameTimerRunning = useGameStore((state) => state.setGameTimerRunning)
     const { newGame } = useLocalSearchParams()
     const isFocused = useIsFocused()
-    
 
     // const verticalSubgridDividerCells = [2, 11, 20, 29, 38, 47, 56, 65, 74, 5, 14, 23, 32, 41, 50, 59, 68, 77]
     // const horizontalSubgridDividerCells = [18, 19, 20, 21, 22, 23, 24, 25, 26, 45, 46, 47, 48, 49, 50, 51, 52, 53]
@@ -40,7 +39,7 @@ export default function GameBoard({ difficulty }: { difficulty: SudokuDifficulty
     }, [isFocused])
 
     return (
-        <View className='flex flex-wrap flex-row w-[95%] h-[400px] lg:w-[400px]'>
+        <View className='flex flex-1 flex-wrap flex-row w-[95%] lg:w-[30%]'>
             {board.map((row, rowNumber) =>
                 row.map((cellValue, columnNumber) =>
                     <GameBoardCell

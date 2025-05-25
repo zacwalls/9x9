@@ -3,9 +3,8 @@ import { Text, View, TouchableOpacity } from "react-native";
 import { Link } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import useGameStore from '@/hooks/useGameStore'
 import { SudokuDifficulty, sudokuDifficulty } from "@/utils/Sudoku";
-import { useIsFocused } from "@react-navigation/native";
+
 
 function DifficultySelector({ setDifficulty }: { setDifficulty: React.Dispatch<React.SetStateAction<SudokuDifficulty>> }) {
   const [currentOption, setCurrentOption] = useState(0)

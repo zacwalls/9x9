@@ -33,7 +33,7 @@ export default function GameScreen() {
   const isWon = useGameStore((state) => state.isWon)
 
   return (
-    <View className='flex h-full flex-col items-center bg-black'>
+    <View className='flex h-full flex-col gap-8 justify-between items-center bg-black'>
       {isWon ? <WonScreen />
       : <>
         <GameBoardNav />

@@ -9,7 +9,7 @@ export default function GameBoardInputs() {
   const undo = useGameStore((state) => state.undo)
 
   return (
-    <View className='flex flex-row flex-wrap items-center justify-center gap-5 mt-48 lg:mt-36'>
+    <View className='flex flex-row flex-wrap items-center justify-center gap-5 py-8'>
       {Array.from({ length: 9 }, (_, i) => i + 1).map(number =>
         <TouchableOpacity
           className='flex justify-center items-center border border-white p-5 lg:p-3'
