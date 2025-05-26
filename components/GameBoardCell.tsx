@@ -26,7 +26,7 @@ export default function GameBoardCell({ row, column, value }: { row: number, col
       className={classNames}
       onPress={() => setSelectedCell([row, column])}
     >
-      <Text className='text-white text-4xl lg:text-3xl p-2'>{value !== 0 ? value : ' '}</Text>
+      <Text className='text-white text-xl lg:text-3xl'>{value !== 0 ? value : ' '}</Text>
     </TouchableOpacity>
   )
 }

@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { View } from 'react-native'
+import { View, Dimensions } from 'react-native'
 import { useLocalSearchParams } from "expo-router"
 
 import Sudoku, { SudokuDifficulty } from '@/utils/Sudoku'
@@ -7,6 +7,7 @@ import useGameStore from "@/hooks/useGameStore"
 import GameBoardCell from "@/components/GameBoardCell"
 import { useIsFocused } from "@react-navigation/native"
 
+const { width } = Dimensions.get('window')
 
 export default function GameBoard({ difficulty }: { difficulty: SudokuDifficulty }) {
     const board = useGameStore((state) => state.board)
@@ -39,7 +40,13 @@ export default function GameBoard({ difficulty }: { difficulty: SudokuDifficulty
     }, [isFocused])
 
     return (
-        <View className='flex flex-1 flex-wrap flex-row w-[95%] lg:w-[30%]'>
+        <View
+            className='flex flex-wrap flex-row'
+            style={{
+                width: width - 30,
+                height: width - 30
+            }}
+            >
             {board.map((row, rowNumber) =>
                 row.map((cellValue, columnNumber) =>
                     <GameBoardCell
